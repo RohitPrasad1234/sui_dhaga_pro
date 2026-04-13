@@ -4,6 +4,8 @@ import { auth } from '@/auth';
 import dbConnect from '@/lib/db';
 import Order from '@/models/Order';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/checkout
  * Creates a Stripe Checkout Session and returns the session URL

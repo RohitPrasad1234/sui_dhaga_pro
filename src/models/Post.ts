@@ -28,7 +28,7 @@ const PostSchema: Schema = new Schema(
     { timestamps: true }
 );
 
-PostSchema.virtual('id').get(function () {
+PostSchema.virtual('id').get(function (this: any) {
     return this._id.toHexString();
 });
 

@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
-import pool from "@/lib/db";
-import { RowDataPacket } from "mysql2";
+import dbConnect from "@/lib/db";
+import Order from "@/models/Order";
 import { Package, Truck, CreditCard, User, Scissors, ChevronRight, Search, Clock, CheckCircle2, AlertCircle } from "lucide-react";
 import Link from "next/link";
 
@@ -8,17 +8,22 @@ export default async function AdminOrdersPage() {
     const session = await auth();
     if (session?.user.role !== 'admin') return <p className="text-secondary p-8">Access Denied</p>;
 
+    await dbConnect();
     // Fetch all orders with customer and tailor names
-    const [orders] = await pool.execute<RowDataPacket[]>(`
-        SELECT 
-            o.*, 
-            c.name as customer_name_db, 
-            t.name as tailor_name_db
-        FROM orders o
-        JOIN users c ON o.client_id = c.id
-        LEFT JOIN users t ON o.tailor_id = t.id
-        ORDER BY o.created_at DESC
-    `);
+    const dbOrders = await Order.find()
+        .populate('client_id', 'name')
+        .populate('tailor_id', 'name')
+        .sort({ createdAt: -1 });
+
+    const orders = dbOrders.map(o => {
+        const order = o.toObject();
+        return {
+            ...order,
+            id: order._id.toString(),
+            customer_name_db: (order.client_id as any)?.name || 'Unknown',
+            tailor_name_db: (order.tailor_id as any)?.name || null
+        };
+    });
 
     return (
         <div className="space-y-10">

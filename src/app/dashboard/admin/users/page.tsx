@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
-import pool from "@/lib/db";
-import { RowDataPacket } from "mysql2";
+import dbConnect from "@/lib/db";
+import User from "@/models/User";
 import { UserCheck, Mail, Calendar, Hash, ShieldCheck, ChevronRight, Search } from "lucide-react";
 import Link from "next/link";
 
@@ -8,10 +8,18 @@ export default async function AdminUsersPage() {
     const session = await auth();
     if (session?.user.role !== 'admin') return <p className="text-secondary p-8">Access Denied</p>;
 
+    await dbConnect();
     // Fetch all users
-    const [users] = await pool.execute<RowDataPacket[]>(
-        'SELECT id, name, email, role, location, phone, is_active, created_at FROM users ORDER BY created_at DESC'
-    );
+    const dbUsers = await User.find().sort({ createdAt: -1 });
+
+    const users = dbUsers.map(u => {
+        const user = u.toObject();
+        return {
+            ...user,
+            id: user._id.toString(),
+            created_at: user.createdAt
+        };
+    });
 
     return (
         <div className="space-y-10">

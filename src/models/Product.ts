@@ -31,7 +31,7 @@ const ProductSchema: Schema = new Schema(
     { timestamps: true }
 );
 
-ProductSchema.virtual('id').get(function () {
+ProductSchema.virtual('id').get(function (this: any) {
     return this._id.toHexString();
 });
 

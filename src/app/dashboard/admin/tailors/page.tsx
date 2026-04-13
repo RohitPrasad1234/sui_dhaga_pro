@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
-import pool from "@/lib/db";
-import { RowDataPacket } from "mysql2";
+import dbConnect from "@/lib/db";
+import User from "@/models/User";
 import { Scissors, Star, MapPin, Phone, Award, ChevronRight, Search, Zap } from "lucide-react";
 import Link from "next/link";
 
@@ -8,10 +8,18 @@ export default async function AdminTailorsPage() {
     const session = await auth();
     if (session?.user.role !== 'admin') return <p className="text-secondary p-8">Access Denied</p>;
 
+    await dbConnect();
     // Fetch all tailors
-    const [tailors] = await pool.execute<RowDataPacket[]>(
-        'SELECT id, name, email, location, phone, bio, image, is_active, created_at FROM users WHERE role = "tailor" ORDER BY created_at DESC'
-    );
+    const dbTailors = await User.find({ role: 'tailor' }).sort({ createdAt: -1 });
+    
+    const tailors = dbTailors.map(t => {
+        const tailor = t.toObject();
+        return {
+            ...tailor,
+            id: tailor._id.toString(),
+            created_at: tailor.createdAt
+        };
+    });
 
     return (
         <div className="space-y-10">

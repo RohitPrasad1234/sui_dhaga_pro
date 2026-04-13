@@ -32,7 +32,7 @@ const UserSchema: Schema = new Schema(
 );
 
 // Virtual for id to match MySQL numeric ID if needed as a string
-UserSchema.virtual('id').get(function () {
+UserSchema.virtual('id').get(function (this: any) {
     return this._id.toHexString();
 });
 

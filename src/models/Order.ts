@@ -91,7 +91,7 @@ const OrderSchema: Schema = new Schema(
     { timestamps: true }
 );
 
-OrderSchema.virtual('id').get(function () {
+OrderSchema.virtual('id').get(function (this: any) {
     return this._id.toHexString();
 });
 
